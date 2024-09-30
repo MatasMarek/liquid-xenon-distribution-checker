@@ -49,35 +49,29 @@ def average_distance_calculator(distribution, distribution_margins):
 
 
 
-def plot_results(distances, rs, no_of_atoms, error):
+def plot_results(distances, rs, no_of_atoms, error, experiment_data):
     dft_distances = [4.2657, 6.0326, 7.3884, 8.5314, 9.5384]
 
-    plt.axvline(dft_distances[0], 0., 3., label='Atomic position of a solid', linewidth=2, c='gray', linestyle='--')
+    fig, ax = plt.subplots()
+    ax.axvline(dft_distances[0], 0., 3., label='Atomic position of a solid', linewidth=2, c='gray', linestyle='--')
     for distance in dft_distances[1:]:
-        plt.axvline(distance, 0, 3, linewidth=2, c='gray', linestyle='--')
-
+        ax.axvline(distance, 0, 3, linewidth=2, c='gray', linestyle='--')
 
     number_density = 0.01315
-
     bin_width = rs[1] - rs[0]
     distances = distances / no_of_atoms / bin_width
     average = number_density * 4. * np.pi * rs ** 2
+    plot_values = distances / average
 
-    plot_values = distances/average
-
-    plt.plot(rs, np.array(plot_values), label='Input distribution')
-    experiment = np.loadtxt('xenon_distribution_data.txt')
-    plt.plot(experiment[:, 0], experiment[:, 1], 'o', color='green', label='Experimental data')
-    plt.legend(loc='upper right', facecolor='white', framealpha=1)
-    plt.title('Error score: ' + str(round(error, 2)))
-    # plt.ylim(0., 3.5)
-    plt.ylim(0., 4.)
-    plt.xlim(3.7, 10.)
-    plt.xlabel('Distance from atom [$\AA$]')
-    plt.ylabel('Radial distribution function [-]')
-    plt.show()
-    plt.close()
-    return
+    ax.plot(rs, np.array(plot_values), label='Input distribution')
+    ax.plot(experiment_data[:, 0], experiment_data[:, 1], 'o', color='green', label='Experimental data')
+    ax.legend(loc='upper right', facecolor='white', framealpha=1)
+    ax.set_title('Error score: ' + str(round(error, 2)))
+    ax.set_ylim(0., 4.)
+    ax.set_xlim(3.7, 10.)
+    ax.set_xlabel('Distance from atom [$\AA$]')
+    ax.set_ylabel('Radial distribution function [-]')
+    st.pyplot(fig)
 
 
 def distribution_random(size_of_the_cube, number_of_atoms):
@@ -96,14 +90,11 @@ def plot_distribution(distribution):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(distribution[:, 0], distribution[:, 1], distribution[:, 2])
-    plt.title('Visualisation of the input distribution of atoms')
-    # ad labels to the ax
+    ax.set_title('Visualization of the Input Distribution of Atoms')
     ax.set_xlabel('x [$\AA$]')
     ax.set_ylabel('y [$\AA$]')
     ax.set_zlabel('z [$\AA$]')
-    plt.show()
-    plt.close()
-    return
+    st.pyplot(fig)
 
 def run(student_distribution):
     experiment = np.loadtxt('xenon_distribution_data_linear.txt')
@@ -127,7 +118,7 @@ def run(student_distribution):
 st.image("xenon.jpeg", use_column_width=True)
 
 # Let the user upload multiple files via `st.file_uploader`.
-uploaded_file = st.file_uploader("Upload documents [.txt], space as a delimeter", type=["csv", "xlsx", "txt"], accept_multiple_files=False)
+uploaded_file = st.file_uploader("Upload documents [.txt], space as a delimeter", type=["txt"], accept_multiple_files=False)
 if uploaded_file is not None:
     student_distribution = np.loadtxt(uploaded_file)
     run(student_distribution)

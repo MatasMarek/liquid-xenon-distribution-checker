@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import StringIO
 
-st.markdown("<h1 style='text-align: center; color: white;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
 
 # Written description below the title
 st.markdown("""
 This application allows you to check the distribution of liquid xenon atoms. 
-Upload your atomic position data to see how it compares with experimental data.
+Upload your atomic position data to see how it compares with experimental data. The units are angstroms. Density is \(1.315 \times 10^{-2}\) atoms/\(A^3\).
 """)
 
 def find_whole(array, values):
@@ -23,9 +23,10 @@ def find_fractional(array, values):
 
 def create_margins(size_of_the_cube, atomic_positions):
     atomic_positions_margins = np.zeros((1, 3))
-    for value_x in [-size_of_the_cube, 0, size_of_the_cube]:
-        for value_y in [-size_of_the_cube, 0, size_of_the_cube]:
-            for value_z in [-size_of_the_cube, 0, size_of_the_cube]:
+    shifts = [-size_of_the_cube, 0, size_of_the_cube]
+    for value_x in shifts:
+        for value_y in shifts:
+            for value_z in shifts:
                 if not (value_x == 0 and value_y == 0 and value_z == 0):
                     shifted_positions = atomic_positions + np.array([value_x, value_y, value_z])
                     atomic_positions_margins = np.concatenate((atomic_positions_margins, shifted_positions))
@@ -98,8 +99,11 @@ def run(student_distribution):
     display_rankings()
 
 def display_rankings():
-    # Create a DataFrame with the hardcoded 'Random' entry
-    scores_df = pd.DataFrame([{'Name': 'Random', 'Error Score': 28.6}])
+    # Create a DataFrame with the hardcoded 'Random distribution' entry
+    scores_df = pd.DataFrame([{'Name': 'Random distribution', 'Error Score': 28.6}])
+
+    # Set the index to start from 1 instead of 0
+    scores_df.index = scores_df.index + 1
 
     # Display the rankings
     st.markdown("## Rankings")

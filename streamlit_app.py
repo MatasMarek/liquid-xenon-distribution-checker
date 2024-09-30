@@ -2,10 +2,23 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
 from io import StringIO
 
-st.markdown("<h1 style='text-align: center; color: white;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="Liquid Xenon Distribution Checker", layout="wide")
+
+# Adjustable text at the top
+default_text = """
+Welcome to the Liquid Xenon Distribution Checker!
+
+Upload your atomic distribution data to analyze and compare it with experimental data. You can choose to submit your results to the ranking leaderboard.
+"""
+custom_text = st.text_area("Introductory Text", default_text, height=150)
+
+st.markdown(f"<div style='text-align: center; color: black;'>{custom_text}</div>", unsafe_allow_html=True)
+
+# Initialize session state for scores
+if 'scores' not in st.session_state:
+    st.session_state.scores = []
 
 def find_whole(array, values):
     ixs = np.round(find_fractional(array, values)).astype(int)
@@ -89,7 +102,7 @@ def plot_distribution(distribution):
     plt.close(fig)
     return
 
-def run(student_distribution, name):
+def run(student_distribution, name, submit_to_ranking):
     experiment = np.loadtxt('xenon_distribution_data_linear.txt')
     number_density = 0.01315
     size_of_the_cube = np.power(len(student_distribution) / number_density, 1./3.)
@@ -98,40 +111,34 @@ def run(student_distribution, name):
     average = number_density * 4. * np.pi * rs ** 2
     error = (np.abs((experiment[:, 1] - distances / average / len(student_distribution)) / experiment[:, 1])).sum()
 
-    # Store the name and error score
-    save_score(name, error)
-
     # Plot results
     plot_results(distances, rs, len(student_distribution), error)
     plot_distribution(student_distribution)
+
+    # Optionally store the name and error score in session state
+    if submit_to_ranking:
+        st.session_state.scores.append({'Name': name, 'Error Score': error})
 
     # Display rankings
     display_rankings()
     return
 
-def save_score(name, error):
-    import threading
-    lock = threading.Lock()
-    with lock:
-        # Check if the file exists
-        if not os.path.isfile('scores.csv'):
-            # Create the file and write the header
-            with open('scores.csv', 'w') as f:
-                f.write('Name,Error Score\n')
-        # Append the new score
-        with open('scores.csv', 'a') as f:
-            f.write(f'{name},{error}\n')
-
 def display_rankings():
-    # Read the scores file
-    scores_df = pd.read_csv('scores.csv')
-    # Sort by Error Score
-    scores_df = scores_df.sort_values(by='Error Score')
-    # Reset index
-    scores_df = scores_df.reset_index(drop=True)
-    # Display the rankings
-    st.markdown("## Rankings")
-    st.table(scores_df)
+    if st.session_state.scores:
+        # Create a DataFrame from session state scores
+        scores_df = pd.DataFrame(st.session_state.scores)
+        # Remove duplicates, keep the lowest error score for each user
+        scores_df = scores_df.groupby('Name', as_index=False).min()
+        # Sort by Error Score
+        scores_df = scores_df.sort_values(by='Error Score')
+        # Reset index
+        scores_df = scores_df.reset_index(drop=True)
+        # Display the rankings
+        st.markdown("## Rankings")
+        st.table(scores_df)
+    else:
+        st.markdown("## Rankings")
+        st.write("No rankings to display yet.")
 
 # Display an image, centered below the title
 st.image("xenon.jpeg", use_column_width=True)
@@ -139,15 +146,26 @@ st.image("xenon.jpeg", use_column_width=True)
 # Name input
 name = st.text_input('Enter your name')
 
-# Let the user upload a file via `st.file_uploader`.
+# Option to submit to ranking
+submit_to_ranking = st.checkbox('Submit to ranking', value=True)
+
+# File uploader
 uploaded_file = st.file_uploader("Upload document [.txt], space as a delimiter", type=["txt"], accept_multiple_files=False)
-if uploaded_file is not None and name:
-    # Read the uploaded file as a string
-    file_content = uploaded_file.read().decode('utf-8')
-    # Convert the string to a StringIO object
-    string_io = StringIO(file_content)
-    # Load the data using numpy
-    student_distribution = np.loadtxt(string_io)
-    run(student_distribution, name)
-elif uploaded_file is not None and not name:
-    st.warning("Please enter your name before uploading the file.")
+
+# Submit button
+if st.button('Submit'):
+    if uploaded_file is not None and name:
+        # Read the uploaded file as a string
+        file_content = uploaded_file.read().decode('utf-8')
+        # Convert the string to a StringIO object
+        string_io = StringIO(file_content)
+        # Load the data using numpy
+        try:
+            student_distribution = np.loadtxt(string_io)
+            run(student_distribution, name, submit_to_ranking)
+        except Exception as e:
+            st.error(f"Error loading data: {e}")
+    elif not name:
+        st.warning("Please enter your name before submitting.")
+    elif uploaded_file is None:
+        st.warning("Please upload a data file before submitting.")

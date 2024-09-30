@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import StringIO
 
-st.markdown("<h1 style='text-align: center; color: black;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
 
 # Written description below the title
 st.markdown("""

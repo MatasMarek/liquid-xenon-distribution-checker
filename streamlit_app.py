@@ -128,13 +128,15 @@ def run():
 st.image("xenon.jpeg", use_column_width=True)
 
 # Let the user upload multiple files via `st.file_uploader`.
-uploaded_files = st.file_uploader("Upload documents [.txt], space as a delimeter", type=["csv", "xlsx", "txt"], accept_multiple_files=False)
-
-if uploaded_files is not None and len(uploaded_files) > 0:
-    data_frames = []
-    for uploaded_file in uploaded_files:
-        student_distribution = np.loadtxt(uploaded_file)
-        run(student_distribution)
+uploaded_file = st.file_uploader("Upload documents [.txt], space as a delimeter", type=["csv", "xlsx", "txt"], accept_multiple_files=False)
+if uploaded_file is not None:
+    student_distribution = np.loadtxt(uploaded_file)
+    run(student_distribution)
+# if uploaded_files is not None and len(uploaded_files) > 0:
+#     data_frames = []
+#     for uploaded_file in uploaded_files:
+#         student_distribution = np.loadtxt(uploaded_file)
+#         run(student_distribution)
 
 
 

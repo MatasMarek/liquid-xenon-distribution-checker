@@ -105,7 +105,7 @@ def plot_distribution(distribution):
     plt.close()
     return
 
-def run():
+def run(student_distribution):
     experiment = np.loadtxt('xenon_distribution_data_linear.txt')
     number_density = 0.01315
 

@@ -110,7 +110,6 @@ def run(student_distribution):
     number_density = 0.01315
 
     # INPUT
-    student_distribution = np.loadtxt('student_distribution.txt')
     size_of_the_cube = np.power(len(student_distribution)/number_density, 1./3.)
 
     margins_of_a_student_distribution = create_margins(size_of_the_cube, student_distribution)

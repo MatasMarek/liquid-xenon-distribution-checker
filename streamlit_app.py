@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from io import StringIO
 
-st.markdown("<h1 style='text-align: center; color: black;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>Liquid Xenon Distribution Checker</h1>", unsafe_allow_html=True)
 
 # Written description below the title
 st.markdown("""
 This application allows you to check the distribution of liquid xenon atoms. 
-Upload your atomic position data to see how it compares with experimental data. The units are angstroms. Density is \(1.315 \times 10^{-2}\) atoms/\(A^3\).
+Upload your atomic position data to see how it compares with experimental data. 
+            The units are angstroms. Density is 1.315 * 10^-2 atoms/A^3.
 """)
 
 def find_whole(array, values):

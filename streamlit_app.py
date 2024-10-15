@@ -13,6 +13,22 @@ Upload your atomic position data to see how it compares with experimental data.
             The units are angstroms. Density is 1.315 * 10^-2 atoms/A^3.
 """)
 
+
+# Path to your .zip file on the server
+file_path = 'task_description.zip'
+
+# Read the .zip file in binary mode
+with open(file_path, 'rb') as f:
+    file_bytes = f.read()
+
+# Create a download button
+st.download_button(
+    label='Download Task Descriptions',
+    data=file_bytes,
+    file_name='task_description.zip',  # Name of the downloaded file
+    mime='application/zip'         # MIME type for ZIP files
+)
+
 def find_whole(array, values):
     ixs = np.round(find_fractional(array, values)).astype(int)
     return ixs
@@ -48,20 +64,19 @@ def average_distance_calculator(distribution, distribution_margins):
                 average_distance_random[int(idx)] += 1.
     return average_distance_random, rs
 
-def plot_results(distances, rs, no_of_atoms, error):
+def plot_results(distances, rs, no_of_atoms):
     dft_distances = [4.2657, 6.0326, 7.3884, 8.5314, 9.5384]
     fig, ax = plt.subplots()
     for distance in dft_distances:
         ax.axvline(distance, color='gray', linestyle='--', linewidth=1)
-
+    experiment = np.loadtxt('xenon_distribution_data_linear.txt')
     number_density = 0.01315
     bin_width = rs[1] - rs[0]
     distances = distances / (no_of_atoms * bin_width)
     average = number_density * 4. * np.pi * rs ** 2
-    plot_values = distances / average
-
+    plot_values = np.array(distances / average)
+    error = np.sqrt(np.sum((plot_values - experiment[:, 1])**2))
     ax.plot(rs, plot_values, label='Input distribution')
-    experiment = np.loadtxt('xenon_distribution_data_linear.txt')
     ax.plot(experiment[:, 0], experiment[:, 1], 'o', color='green', label='Experimental data')
     ax.legend(loc='upper right')
     ax.set_title('Error score: ' + str(round(error, 2)))
@@ -84,16 +99,12 @@ def plot_distribution(distribution):
     plt.close(fig)
 
 def run(student_distribution):
-    experiment = np.loadtxt('xenon_distribution_data_linear.txt')
     number_density = 0.01315
     size_of_the_cube = (len(student_distribution) / number_density) ** (1./3.)
     margins_of_a_student_distribution = create_margins(size_of_the_cube, student_distribution)
     distances, rs = average_distance_calculator(student_distribution, margins_of_a_student_distribution)
-    average = number_density * 4. * np.pi * rs ** 2
-    error = np.sum(np.abs((experiment[:, 1] - distances / average / len(student_distribution)) / experiment[:, 1]))
-
     # Plot results
-    plot_results(distances, rs, len(student_distribution), error)
+    plot_results(distances, rs, len(student_distribution))
     plot_distribution(student_distribution)
 
     # Display rankings
@@ -101,7 +112,10 @@ def run(student_distribution):
 
 def display_rankings():
     # Create a DataFrame with the hardcoded 'Random distribution' entry
-    scores_df = pd.DataFrame([{'Name': 'Random distribution', 'Error Score': 28.6}])
+    scores_df = pd.DataFrame([
+    {'Name': "Marek's distribution", 'Error Score': 0.73},
+    {'Name': 'Random distribution', 'Error Score': 2.5}
+    ])
 
     # Set the index to start from 1 instead of 0
     scores_df.index = scores_df.index + 1

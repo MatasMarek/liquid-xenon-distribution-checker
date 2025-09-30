@@ -125,7 +125,7 @@ def display_rankings():
     st.table(scores_df)
 
 # Display an image, centered below the title
-st.image("xenon.jpeg", use_column_width=True)
+st.image("xenon.jpeg", use_container_width=True)
 
 # Let the user upload a file via `st.file_uploader`.
 uploaded_file = st.file_uploader("Upload your data file (.txt), using space as a delimiter", type=["txt"])

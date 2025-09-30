@@ -114,6 +114,8 @@ def display_rankings():
     # Create a DataFrame with the hardcoded 'Random distribution' entry
     scores_df = pd.DataFrame([
     {'Name': "Marek's distribution", 'Error Score': 0.73},
+    {'Name': "Brute force 2024 distribution", 'Error Score': 1.01},
+    {'Name': "Sphere placing 2024 distribution", 'Error Score': 1.76},
     {'Name': 'Random distribution', 'Error Score': 2.5}
     ])
 
